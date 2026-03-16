@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homework Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Homework Tracker</h1>
+            <nav class="tabs">
+                <button class="tab-btn active" data-tab="todos">To-Do List</button>
+                <button class="tab-btn" data-tab="homework">Homework</button>
+                <button class="tab-btn" data-tab="calendar">Calendar</button>
+            </nav>
+        </header>
+
+        <main>
+            <!-- To-Do Section -->
+            <section id="todos-section" class="tab-content active">
+                <div class="add-task-form">
+                    <input type="text" id="todo-input" placeholder="Add a new task...">
+                    <button id="add-todo-btn">Add</button>
+                </div>
+                <ul id="todo-list" class="task-list"></ul>
+            </section>
+
+            <!-- Homework Section -->
+            <section id="homework-section" class="tab-content">
+                <div class="add-task-form">
+                    <input type="text" id="homework-title" placeholder="Assignment title...">
+                    <select id="subject-select">
+                        <option value="">Select Subject</option>
+                        <option value="math">Math</option>
+                        <option value="science">Science</option>
+                        <option value="english">English</option>
+                        <option value="history">History</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <input type="date" id="homework-due">
+                    <button id="add-homework-btn">Add</button>
+                </div>
+                <div class="filter-bar">
+                    <select id="subject-filter">
+                        <option value="">All Subjects</option>
+                        <option value="math">Math</option>
+                        <option value="science">Science</option>
+                        <option value="english">English</option>
+                        <option value="history">History</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <ul id="homework-list" class="task-list"></ul>
+            </section>
+
+            <!-- Calendar Section -->
+            <section id="calendar-section" class="tab-content">
+                <div class="calendar-header">
+                    <button id="prev-month">&lt;</button>
+                    <h2 id="current-month"></h2>
+                    <button id="next-month">&gt;</button>
+                </div>
+                <div id="calendar-grid" class="calendar-grid"></div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
