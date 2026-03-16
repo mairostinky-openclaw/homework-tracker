@@ -12,7 +12,7 @@ body {
 }
 
 .container {
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
     background: white;
     border-radius: 16px;
@@ -34,6 +34,7 @@ header h1 {
 .tabs {
     display: flex;
     gap: 8px;
+    flex-wrap: wrap;
 }
 
 .tab-btn {
@@ -69,6 +70,61 @@ main {
     display: block;
 }
 
+/* Dashboard Styles */
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.stat-card.overdue {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+}
+
+.stat-number {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.dashboard-sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.dashboard-section {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.dashboard-section h3 {
+    margin-bottom: 12px;
+    color: #333;
+    font-size: 16px;
+}
+
+.dashboard-section .task-item {
+    background: white;
+}
+
+/* Form Styles */
 .add-task-form {
     display: flex;
     gap: 10px;
@@ -83,7 +139,7 @@ main {
     border-radius: 8px;
     font-size: 14px;
     flex: 1;
-    min-width: 150px;
+    min-width: 140px;
     transition: border-color 0.3s ease;
 }
 
@@ -112,6 +168,10 @@ main {
 
 .filter-bar {
     margin-bottom: 16px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 .filter-bar select {
@@ -121,6 +181,20 @@ main {
     font-size: 14px;
 }
 
+.sort-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: #666;
+    cursor: pointer;
+}
+
+.sort-toggle input {
+    accent-color: #667eea;
+}
+
+/* Task List Styles */
 .task-list {
     list-style: none;
 }
@@ -128,11 +202,12 @@ main {
 .task-item {
     display: flex;
     align-items: center;
-    padding: 16px;
+    padding: 14px 16px;
     background: #f8f9fa;
     border-radius: 10px;
     margin-bottom: 10px;
     transition: all 0.3s ease;
+    border-left: 4px solid #e0e0e0;
 }
 
 .task-item:hover {
@@ -146,6 +221,19 @@ main {
 
 .task-item.completed .task-text {
     text-decoration: line-through;
+}
+
+/* Priority borders */
+.task-item.priority-high {
+    border-left-color: #e74c3c;
+}
+
+.task-item.priority-medium {
+    border-left-color: #f39c12;
+}
+
+.task-item.priority-low {
+    border-left-color: #27ae60;
 }
 
 .task-checkbox {
@@ -167,6 +255,7 @@ main {
     gap: 12px;
     align-items: center;
     margin-right: 12px;
+    flex-wrap: wrap;
 }
 
 .subject-tag {
@@ -182,6 +271,18 @@ main {
 .subject-english { background: #45b7d1; color: white; }
 .subject-history { background: #f9ca24; color: #333; }
 .subject-other { background: #a55eea; color: white; }
+
+.priority-tag {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.priority-high { background: #e74c3c; color: white; }
+.priority-medium { background: #f39c12; color: white; }
+.priority-low { background: #27ae60; color: white; }
 
 .due-date {
     font-size: 13px;
@@ -299,6 +400,8 @@ main {
     .tab-btn {
         flex: 1;
         text-align: center;
+        font-size: 12px;
+        padding: 8px 12px;
     }
     
     .add-task-form {
@@ -309,5 +412,14 @@ main {
     .add-task-form select,
     .add-task-form button {
         width: 100%;
+    }
+    
+    .task-item {
+        flex-wrap: wrap;
+    }
+    
+    .task-meta {
+        margin-left: 36px;
+        margin-top: 8px;
     }
 }

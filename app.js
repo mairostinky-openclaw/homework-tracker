@@ -1,11 +1,14 @@
 // Homework Tracker App
-// Part 1: Basic To-Do List Functionality
+// Part 1 + Part 2: To-Do, Homework, Calendar, Dashboard with Priorities
 
 // Data Storage
 const store = {
     todos: [],
     homework: []
 };
+
+// Priority order for sorting
+const priorityOrder = { high: 3, medium: 2, low: 1 };
 
 // Load data from localStorage
 function loadData() {
@@ -31,21 +34,102 @@ function generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
+// ==================== Dashboard Functions ====================
+
+function updateDashboard() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const totalTasks = store.todos.length + store.homework.length;
+    const completedTasks = store.todos.filter(t => t.completed).length + 
+                          store.homework.filter(h => h.completed).length;
+    const pendingTasks = totalTasks - completedTasks;
+    
+    // Count overdue
+    let overdueCount = 0;
+    store.homework.forEach(hw => {
+        const dueDate = new Date(hw.dueDate);
+        dueDate.setHours(0, 0, 0, 0);
+        if (dueDate < today && !hw.completed) {
+            overdueCount++;
+        }
+    });
+    
+    document.getElementById('total-tasks').textContent = totalTasks;
+    document.getElementById('completed-tasks').textContent = completedTasks;
+    document.getElementById('pending-tasks').textContent = pendingTasks;
+    document.getElementById('overdue-tasks').textContent = overdueCount;
+    
+    // Upcoming tasks (next 7 days)
+    const upcomingList = document.getElementById('upcoming-list');
+    const nextWeek = new Date(today);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    
+    const upcoming = [...store.homework]
+        .filter(hw => {
+            const due = new Date(hw.dueDate);
+            due.setHours(0, 0, 0, 0);
+            return due >= today && due <= nextWeek && !hw.completed;
+        })
+        .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+        .slice(0, 5);
+    
+    if (upcoming.length === 0) {
+        upcomingList.innerHTML = '<div class="empty-message">No upcoming tasks! 🎉</div>';
+    } else {
+        upcomingList.innerHTML = upcoming.map(hw => `
+            <li class="task-item priority-${hw.priority}">
+                <span class="task-text">${escapeHtml(hw.title)}</span>
+                <div class="task-meta">
+                    <span class="subject-tag subject-${hw.subject}">${hw.subject}</span>
+                    <span class="due-date">${formatDate(hw.dueDate)}</span>
+                </div>
+            </li>
+        `).join('');
+    }
+    
+    // Overdue tasks
+    const overdueList = document.getElementById('overdue-list');
+    const overdue = store.homework
+        .filter(hw => {
+            const due = new Date(hw.dueDate);
+            due.setHours(0, 0, 0, 0);
+            return due < today && !hw.completed;
+        })
+        .slice(0, 5);
+    
+    if (overdue.length === 0) {
+        overdueList.innerHTML = '<div class="empty-message">No overdue tasks! ✅</div>';
+    } else {
+        overdueList.innerHTML = overdue.map(hw => `
+            <li class="task-item priority-${hw.priority}">
+                <span class="task-text">${escapeHtml(hw.title)}</span>
+                <div class="task-meta">
+                    <span class="subject-tag subject-${hw.subject}">${hw.subject}</span>
+                    <span class="due-date overdue">${formatDate(hw.dueDate)}</span>
+                </div>
+            </li>
+        `).join('');
+    }
+}
+
 // ==================== To-Do List Functions ====================
 
-function addTodo(text) {
+function addTodo(text, priority = 'medium') {
     if (!text.trim()) return;
     
     const todo = {
         id: generateId(),
         text: text.trim(),
         completed: false,
+        priority: priority,
         createdAt: new Date().toISOString()
     };
     
     store.todos.push(todo);
     saveData();
     renderTodos();
+    updateDashboard();
 }
 
 function toggleTodo(id) {
@@ -54,6 +138,7 @@ function toggleTodo(id) {
         todo.completed = !todo.completed;
         saveData();
         renderTodos();
+        updateDashboard();
     }
 }
 
@@ -61,23 +146,39 @@ function deleteTodo(id) {
     store.todos = store.todos.filter(t => t.id !== id);
     saveData();
     renderTodos();
+    updateDashboard();
 }
 
-function renderTodos() {
+function renderTodos(filterPriority = '', sortByPriority = false) {
     const list = document.getElementById('todo-list');
     list.innerHTML = '';
     
-    if (store.todos.length === 0) {
+    let filtered = [...store.todos];
+    if (filterPriority) {
+        filtered = filtered.filter(t => t.priority === filterPriority);
+    }
+    
+    // Sort
+    if (sortByPriority) {
+        filtered.sort((a, b) => priorityOrder[b.priority] - priorityOrder[a.priority]);
+    } else {
+        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
+    
+    if (filtered.length === 0) {
         list.innerHTML = '<div class="empty-message">No tasks yet. Add one above! 📝</div>';
         return;
     }
     
-    store.todos.forEach(todo => {
+    filtered.forEach(todo => {
         const li = document.createElement('li');
-        li.className = `task-item ${todo.completed ? 'completed' : ''}`;
+        li.className = `task-item priority-${todo.priority} ${todo.completed ? 'completed' : ''}`;
         li.innerHTML = `
             <input type="checkbox" class="task-checkbox" ${todo.completed ? 'checked' : ''}>
             <span class="task-text">${escapeHtml(todo.text)}</span>
+            <div class="task-meta">
+                <span class="priority-tag priority-${todo.priority}">${todo.priority}</span>
+            </div>
             <button class="delete-btn" data-id="${todo.id}">Delete</button>
         `;
         
@@ -90,7 +191,7 @@ function renderTodos() {
 
 // ==================== Homework Functions ====================
 
-function addHomework(title, subject, dueDate) {
+function addHomework(title, subject, dueDate, priority = 'medium') {
     if (!title.trim() || !subject || !dueDate) {
         alert('Please fill in all fields for homework');
         return;
@@ -101,6 +202,7 @@ function addHomework(title, subject, dueDate) {
         title: title.trim(),
         subject: subject,
         dueDate: dueDate,
+        priority: priority,
         completed: false,
         createdAt: new Date().toISOString()
     };
@@ -108,6 +210,7 @@ function addHomework(title, subject, dueDate) {
     store.homework.push(homework);
     saveData();
     renderHomework();
+    updateDashboard();
 }
 
 function toggleHomework(id) {
@@ -116,6 +219,7 @@ function toggleHomework(id) {
         homework.completed = !homework.completed;
         saveData();
         renderHomework();
+        updateDashboard();
     }
 }
 
@@ -123,19 +227,27 @@ function deleteHomework(id) {
     store.homework = store.homework.filter(h => h.id !== id);
     saveData();
     renderHomework();
+    updateDashboard();
 }
 
-function renderHomework(filterSubject = '') {
+function renderHomework(filterSubject = '', filterPriority = '') {
     const list = document.getElementById('homework-list');
     list.innerHTML = '';
     
-    let filtered = store.homework;
+    let filtered = [...store.homework];
     if (filterSubject) {
-        filtered = store.homework.filter(h => h.subject === filterSubject);
+        filtered = filtered.filter(h => h.subject === filterSubject);
+    }
+    if (filterPriority) {
+        filtered = filtered.filter(h => h.priority === filterPriority);
     }
     
-    // Sort by due date
-    filtered.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+    // Sort by due date, then priority
+    filtered.sort((a, b) => {
+        const dateDiff = new Date(a.dueDate) - new Date(b.dueDate);
+        if (dateDiff !== 0) return dateDiff;
+        return priorityOrder[b.priority] - priorityOrder[a.priority];
+    });
     
     if (filtered.length === 0) {
         list.innerHTML = '<div class="empty-message">No homework assignments. Add one above! 📚</div>';
@@ -151,12 +263,13 @@ function renderHomework(filterSubject = '') {
         const isOverdue = dueDate < today && !hw.completed;
         
         const li = document.createElement('li');
-        li.className = `task-item ${hw.completed ? 'completed' : ''}`;
+        li.className = `task-item priority-${hw.priority} ${hw.completed ? 'completed' : ''}`;
         li.innerHTML = `
             <input type="checkbox" class="task-checkbox" ${hw.completed ? 'checked' : ''}>
             <span class="task-text">${escapeHtml(hw.title)}</span>
             <div class="task-meta">
                 <span class="subject-tag subject-${hw.subject}">${hw.subject}</span>
+                <span class="priority-tag priority-${hw.priority}">${hw.priority}</span>
                 <span class="due-date ${isOverdue ? 'overdue' : ''}">${formatDate(hw.dueDate)}</span>
             </div>
             <button class="delete-btn" data-id="${hw.id}">Delete</button>
@@ -299,6 +412,8 @@ function setupTabs() {
             
             if (tab === 'calendar') {
                 renderCalendar();
+            } else if (tab === 'dashboard') {
+                updateDashboard();
             }
         });
     });
@@ -310,16 +425,29 @@ function setupEventListeners() {
     // Todo input
     document.getElementById('add-todo-btn').addEventListener('click', () => {
         const input = document.getElementById('todo-input');
-        addTodo(input.value);
+        const priority = document.getElementById('priority-select').value;
+        addTodo(input.value, priority);
         input.value = '';
     });
     
     document.getElementById('todo-input').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             const input = e.target;
-            addTodo(input.value);
+            const priority = document.getElementById('priority-select').value;
+            addTodo(input.value, priority);
             input.value = '';
         }
+    });
+    
+    // Todo filters
+    document.getElementById('priority-filter').addEventListener('change', (e) => {
+        const sortByPriority = document.getElementById('sort-by-priority').checked;
+        renderTodos(e.target.value, sortByPriority);
+    });
+    
+    document.getElementById('sort-by-priority').addEventListener('change', (e) => {
+        const filterPriority = document.getElementById('priority-filter').value;
+        renderTodos(filterPriority, e.target.checked);
     });
     
     // Homework input
@@ -327,17 +455,24 @@ function setupEventListeners() {
         const title = document.getElementById('homework-title').value;
         const subject = document.getElementById('subject-select').value;
         const dueDate = document.getElementById('homework-due').value;
+        const priority = document.getElementById('homework-priority').value;
         
-        addHomework(title, subject, dueDate);
+        addHomework(title, subject, dueDate, priority);
         
         document.getElementById('homework-title').value = '';
         document.getElementById('subject-select').value = '';
         document.getElementById('homework-due').value = '';
     });
     
-    // Subject filter
+    // Homework filters
     document.getElementById('subject-filter').addEventListener('change', (e) => {
-        renderHomework(e.target.value);
+        const priorityFilter = document.getElementById('homework-priority-filter').value;
+        renderHomework(e.target.value, priorityFilter);
+    });
+    
+    document.getElementById('homework-priority-filter').addEventListener('change', (e) => {
+        const subjectFilter = document.getElementById('subject-filter').value;
+        renderHomework(subjectFilter, e.target.value);
     });
     
     // Calendar navigation
@@ -358,6 +493,7 @@ function init() {
     loadData();
     setupTabs();
     setupEventListeners();
+    updateDashboard();
     renderTodos();
     renderHomework();
 }

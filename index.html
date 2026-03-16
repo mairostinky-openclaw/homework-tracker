@@ -11,18 +11,68 @@
         <header>
             <h1>📚 Homework Tracker</h1>
             <nav class="tabs">
-                <button class="tab-btn active" data-tab="todos">To-Do List</button>
+                <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+                <button class="tab-btn" data-tab="todos">To-Do List</button>
                 <button class="tab-btn" data-tab="homework">Homework</button>
                 <button class="tab-btn" data-tab="calendar">Calendar</button>
             </nav>
         </header>
 
         <main>
+            <!-- Dashboard Section -->
+            <section id="dashboard-section" class="tab-content active">
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-tasks">0</div>
+                        <div class="stat-label">Total Tasks</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="completed-tasks">0</div>
+                        <div class="stat-label">Completed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="pending-tasks">0</div>
+                        <div class="stat-label">Pending</div>
+                    </div>
+                    <div class="stat-card overdue">
+                        <div class="stat-number" id="overdue-tasks">0</div>
+                        <div class="stat-label">Overdue</div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-sections">
+                    <div class="dashboard-section">
+                        <h3>📅 Upcoming (Next 7 Days)</h3>
+                        <ul id="upcoming-list" class="task-list"></ul>
+                    </div>
+                    <div class="dashboard-section">
+                        <h3>⚠️ Overdue</h3>
+                        <ul id="overdue-list" class="task-list"></ul>
+                    </div>
+                </div>
+            </section>
+
             <!-- To-Do Section -->
-            <section id="todos-section" class="tab-content active">
+            <section id="todos-section" class="tab-content">
                 <div class="add-task-form">
                     <input type="text" id="todo-input" placeholder="Add a new task...">
+                    <select id="priority-select">
+                        <option value="medium">Medium Priority</option>
+                        <option value="high">High Priority</option>
+                        <option value="low">Low Priority</option>
+                    </select>
                     <button id="add-todo-btn">Add</button>
+                </div>
+                <div class="filter-bar">
+                    <select id="priority-filter">
+                        <option value="">All Priorities</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                    <label class="sort-toggle">
+                        <input type="checkbox" id="sort-by-priority"> Sort by priority
+                    </label>
                 </div>
                 <ul id="todo-list" class="task-list"></ul>
             </section>
@@ -39,6 +89,11 @@
                         <option value="history">History</option>
                         <option value="other">Other</option>
                     </select>
+                    <select id="homework-priority">
+                        <option value="medium">Medium Priority</option>
+                        <option value="high">High Priority</option>
+                        <option value="low">Low Priority</option>
+                    </select>
                     <input type="date" id="homework-due">
                     <button id="add-homework-btn">Add</button>
                 </div>
@@ -50,6 +105,12 @@
                         <option value="english">English</option>
                         <option value="history">History</option>
                         <option value="other">Other</option>
+                    </select>
+                    <select id="homework-priority-filter">
+                        <option value="">All Priorities</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
                     </select>
                 </div>
                 <ul id="homework-list" class="task-list"></ul>
